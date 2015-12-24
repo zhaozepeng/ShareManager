@@ -2,6 +2,7 @@ package com.android.sharemanager;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.view.Gravity;
 import android.widget.PopupWindow;
 
@@ -49,55 +50,15 @@ public class ShareManager {
         this.activity = activity;
         this.type = type;
         this.callback = callback;
+        //初始化Share枚举类
         Share demo = Share.QQ_FRIEND;
     }
 
-    public void show() {
-//        Map<String, Object> params = new HashMap<>();
-//        params.put("param", param);
-//        params.put("tiket", AppContext.getInstance().getToken());
-//        params.put("type", type);
-//        LoadingDialog dialog = new LoadingDialog(activity);
-//        dialog.setLoadText(activity.getResources().getString(R.string.txt_getting_share_info));
-//
-//        new AQuery(activity).progress(dialog).ajax(URLConfig.URL_ISHARE_MSG, params, String.class, new AjaxCallback<String>() {
-//
-//            @Override
-//            public void callback(String url, String object, AjaxStatus status) {
-//                CallResponse response = ResponseHelper.handleResponse(url, object, status);
-//                if (response != null && response.getStatus() == 1) {
-//                    final ShareModel model = JSON.parseObject(response.getResult(), ShareModel.class);
-//                    // 将网络图片下载到本地
-//                    image = AQUtility.getCacheFile(AQUtility.getCacheDir(activity), model.imageUrl);
-//                    // 下面是处理下载后的操作
-//                    if (null != image && !image.exists()) { // 不存在图片
-//                        new AQuery(activity).id(new ImageView(activity)).image(model.imageUrl, false, true, 0, R.drawable.ic_launcher, new BitmapAjaxCallback() {
-//                            protected void callback(String url, android.widget.ImageView iv, android.graphics.Bitmap bm, AjaxStatus status) {
-//                                image = AQUtility.getCacheFile(AQUtility.getCacheDir(activity), model.imageUrl);
-//                                try {
-//                                    model.imageUri = Uri.fromFile(image);
-//                                } catch (Exception e) {
-//                                    e.printStackTrace();
-//                                }
-//                                showShareWindow(model);
-//                            }
-//                        });
-//                    } else { // 存在图片
-//                        try {
-//                            model.imageUri = Uri.fromFile(image);
-//                        } catch (Exception e) {
-//                            e.printStackTrace();
-//                        }
-//                        showShareWindow(model);
-//                    }
-//                } else {
-//                    T.showShort(activity, R.string.share_get_info_from_fail);
-//                }
-//            }
-//        });
-    }
-
-    private void showShareWindow(final ShareModel model){
+    /**
+     * 用来展示分享popUpWindow
+     * @param model 分享出去的实体
+     */
+    public void show(final ShareModel model) {
         if (popupWindow == null) {
             popupWindow = new SharePopupWindow(activity, new SharePopupWindow.IShareClickCallback() {
                 @Override
@@ -113,6 +74,14 @@ public class ShareManager {
             });
         }
         popupWindow.showAtLocation(activity.getWindow().getDecorView(), Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);
+    }
+
+    /**
+     * 用来在activity中注册分享回调，请在activity中的onActivityResult函数中调用
+     * @return 是否是分享回调，如果是，则返回true，activity不用处理相关result
+     */
+    public boolean registerOnActivityCallback(int requestCode, int resultCode, Intent data){
+        return false;
     }
 
     /**

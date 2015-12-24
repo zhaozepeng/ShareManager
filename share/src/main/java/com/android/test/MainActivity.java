@@ -4,10 +4,12 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.android.libcore.Toast.T;
 import com.android.sharemanager.R;
 import com.android.sharemanager.ShareModel;
 import com.android.sharemanager.utils.CommonUtil;
@@ -31,10 +33,16 @@ public class MainActivity extends Activity implements View.OnClickListener{
         setContentView(R.layout.activity_main);
 
         btn_choose_pic = (Button) findViewById(R.id.btn_choose_pic);
+        btn_choose_pic.setOnClickListener(this);
         tv_pic_path = (TextView) findViewById(R.id.tv_pic_path);
         btn_share = (Button) findViewById(R.id.btn_share);
+        btn_share.setOnClickListener(this);
 
         shareModel = new ShareModel();
+        shareModel.title = "测试应用分享";
+        shareModel.content = "测试应用分享内容";
+        shareModel.shareUrl = "https://www.baidu.com";
+        shareModel.imageUrl = "https://ss0.bdstatic.com/5aV1bjqh_Q23odCf/static/superman/img/logo/bd_logo1_31bdc765.png";
     }
 
     @Override
@@ -52,9 +60,11 @@ public class MainActivity extends Activity implements View.OnClickListener{
                 intent.setType("image/*");
                 startActivityForResult(Intent.createChooser(intent, "选择图片"), 0);
                 break;
-            case R.id.tv_pic_path:
-                break;
             case R.id.btn_share:
+                if (TextUtils.isEmpty(shareModel.imagePath)){
+                    T.getInstance().showLong("图片未选择");
+                    return;
+                }
                 break;
         }
     }
@@ -68,6 +78,7 @@ public class MainActivity extends Activity implements View.OnClickListener{
                 Uri uri = data.getData();
                 shareModel.imageUri = uri;
                 shareModel.imagePath = CommonUtil.uriToPath(this, uri);
+                tv_pic_path.setText(shareModel.imagePath);
             }
         }
     }

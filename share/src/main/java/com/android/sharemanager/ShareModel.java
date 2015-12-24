@@ -17,7 +17,7 @@ public class ShareModel {
     public Uri imageUri;
     /** 分享图片的本地path路径 */
     public String imagePath;
-    /** 分享出去之后的链接 */
+    /** 分享的链接 */
     public String shareUrl;
     /** 分享的标题 */
     public String title;
