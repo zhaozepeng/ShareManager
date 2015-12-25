@@ -6,10 +6,13 @@ import android.content.Intent;
 import android.view.Gravity;
 import android.widget.PopupWindow;
 
-import com.android.sharemanager.other.SystemShare;
+import com.android.libcore.log.L;
+import com.android.sharemanager.system.SystemShare;
 import com.android.sharemanager.qq.TencentShare;
-
-import java.io.File;
+import com.tencent.connect.common.Constants;
+import com.tencent.tauth.IUiListener;
+import com.tencent.tauth.Tencent;
+import com.tencent.tauth.UiError;
 
 /**
  * Description: #TODO
@@ -18,37 +21,18 @@ import java.io.File;
  * @since 2015-12-18
  */
 public class ShareManager {
-    private int type;
-    private String param;
     private Activity activity;
+    private ShareModel model;
     private IShareCallback callback;
     private PopupWindow popupWindow;
-    private File image;
-
-    /** 分享店铺类型 */
-    public static final int SHARE_SHOP_TYPE = 0;
-    /** 分享产品类型 */
-    public static final int SHARE_PRODUCT_TYPE = 1;
-    /** 分享采购订单 */
-    public static final int SHARE_PURCHASES = 10;
-    /** 平台号子供应商商城分享 */
-    public static final int SHARE_PLATFORM_CHILD_MARKET = 14;
-    /**招商需求详情分享 param：招商需求ID*/
-    public static final int SHARE_DEMAND_DETAIL = 13;
-    /**分享同系列 param：同系列ID*/
-    public static final int SHARE_SAME_SERIES = 15;
+    //QQ分享回调
+    private IUiListener shareListener;
 
     /**
-     * @param param 分享所需的参数
-     * @param type 分享类型 {@linkplain #SHARE_SHOP_TYPE}{@linkplain #SHARE_PRODUCT_TYPE}
-     * {@linkplain #SHARE_PURCHASES} {@linkplain #SHARE_PLATFORM_CHILD_MARKET}
-     * {@linkplain #SHARE_DEMAND_DETAIL} {@linkplain #SHARE_SAME_SERIES}　
-     * @param callback 分享之后的回调，可以为null
+     * @param callback 分享出去的回调
      */
-    public ShareManager(Activity activity, String param, int type, IShareCallback callback){
-        this.param = param;
+    public ShareManager(Activity activity, IShareCallback callback){
         this.activity = activity;
-        this.type = type;
         this.callback = callback;
         //初始化Share枚举类
         Share demo = Share.QQ_FRIEND;
@@ -59,6 +43,7 @@ public class ShareManager {
      * @param model 分享出去的实体
      */
     public void show(final ShareModel model) {
+        this.model = model;
         if (popupWindow == null) {
             popupWindow = new SharePopupWindow(activity, new SharePopupWindow.IShareClickCallback() {
                 @Override
@@ -66,22 +51,59 @@ public class ShareManager {
                     Share.values()[position].doShare(model, activity, Share.values()[position].getType(), callback);
                 }
             });
-            popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
-                @Override
-                public void onDismiss() {
-                    popupWindow = null;
-                }
-            });
         }
         popupWindow.showAtLocation(activity.getWindow().getDecorView(), Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);
     }
 
     /**
-     * 用来在activity中注册分享回调，请在activity中的onActivityResult函数中调用
-     * @return 是否是分享回调，如果是，则返回true，activity不用处理相关result
+     * 用来在activity的onActivityResult函数中注册分享回调
+     * @return 是否是分享回调，如果是，返回true，表明activity不用处理相关result
      */
     public boolean registerOnActivityCallback(int requestCode, int resultCode, Intent data){
+        //QQ分享回调处理
+        if (requestCode == Constants.REQUEST_QQ_SHARE) {
+            if (callback != null) {
+                generateShareListener();
+                Tencent.onActivityResultData(requestCode, resultCode, data, shareListener);
+            }
+            return true;
+        }
+        //系统分享回调处理
+        else if (requestCode == SystemShare.REQUEST_SYSTEM_SHARE){
+            if (callback != null){
+                callback.onShareCallback(resultCode==Activity.RESULT_OK);
+            }
+            return true;
+        }
         return false;
+    }
+
+    private void generateShareListener(){
+        if (shareListener == null) {
+            shareListener = new IUiListener() {
+                @Override
+                public void onComplete(Object o) {
+                    L.i("qq share success", o.toString());
+                    if (callback != null)
+                        callback.onShareCallback(true);
+                }
+
+                @Override
+                public void onError(UiError uiError) {
+                    L.i("qq share fail:code" + uiError.errorCode + "\tmessage:"
+                            + uiError.errorMessage + "\tdetail:" + uiError.errorDetail);
+                    if (callback != null)
+                        callback.onShareCallback(false);
+                }
+
+                @Override
+                public void onCancel() {
+                    L.i("qq share cancel");
+                    if (callback != null)
+                        callback.onShareCallback(false);
+                }
+            };
+        }
     }
 
     /**
@@ -120,10 +142,8 @@ public class ShareManager {
         public void doShare(ShareModel model, Context context, int type, IShareCallback callback){
             try {
                 ((IShare)shareClass.newInstance()).doShare(model, context, type, callback);
-            } catch (InstantiationException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                L.e("ShareManager error", e);
             }
         }
     }

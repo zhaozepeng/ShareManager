@@ -19,24 +19,24 @@ import android.widget.TextView;
 
 public class SharePopupWindow extends PopupWindow {
 
-	private View mMenuView;
-	private LayoutInflater inflater;
-	private GridView gridView;
-	private TextView tv_dismiss;
-	private Activity context;
-	private View view;
+			private View mMenuView;
+			private LayoutInflater inflater;
+			private GridView gridView;
+			private TextView tv_dismiss;
+			private Activity context;
+			private View view;
 
-	public SharePopupWindow(Activity context, final IShareClickCallback callback) {
-		super();
-		this.context = context;
-		inflater = (LayoutInflater) context.getSystemService(Service.LAYOUT_INFLATER_SERVICE);
-		mMenuView = inflater.inflate(R.layout.share_popupwindow, null);
+			public SharePopupWindow(Activity context, final IShareClickCallback callback) {
+				super();
+				this.context = context;
+				inflater = (LayoutInflater) context.getSystemService(Service.LAYOUT_INFLATER_SERVICE);
+				mMenuView = inflater.inflate(R.layout.share_popupwindow, null);
 
-		gridView = (GridView) mMenuView.findViewById(R.id.gridview);
-		tv_dismiss = (TextView) mMenuView.findViewById(R.id.tv_dismiss);
+				gridView = (GridView) mMenuView.findViewById(R.id.gridview);
+				tv_dismiss = (TextView) mMenuView.findViewById(R.id.tv_dismiss);
 
-		gridView.setAdapter(new GridViewAdapter());
-		gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+				gridView.setAdapter(new GridViewAdapter());
+				gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				if (callback != null)
@@ -59,6 +59,8 @@ public class SharePopupWindow extends PopupWindow {
 		this.setWidth(LayoutParams.MATCH_PARENT);
 		this.setHeight(LayoutParams.WRAP_CONTENT);
 		this.setFocusable(true);
+
+		//点击popUpWindow其他部分消失
 		mMenuView.setOnTouchListener(new OnTouchListener() {
 			public boolean onTouch(View v, MotionEvent event) {
 				int height = mMenuView.findViewById(R.id.pop_layout).getTop();
@@ -72,9 +74,9 @@ public class SharePopupWindow extends PopupWindow {
 			}
 		});
 
+		//增加popUpWindow其他部分的灰色效果
 		view = new View(context);
 		view.setBackgroundColor(Color.parseColor("#b0000000"));
-
 		((ViewGroup)context.getWindow().getDecorView().getRootView()).addView(view);
 	}
 

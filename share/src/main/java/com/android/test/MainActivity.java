@@ -10,7 +10,9 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.android.libcore.Toast.T;
+import com.android.sharemanager.IShareCallback;
 import com.android.sharemanager.R;
+import com.android.sharemanager.ShareManager;
 import com.android.sharemanager.ShareModel;
 import com.android.sharemanager.utils.CommonUtil;
 
@@ -25,6 +27,7 @@ public class MainActivity extends Activity implements View.OnClickListener{
     private Button btn_choose_pic;
     private TextView tv_pic_path;
     private Button btn_share;
+    private ShareManager shareManager;
     private ShareModel shareModel;
 
     @Override
@@ -37,6 +40,13 @@ public class MainActivity extends Activity implements View.OnClickListener{
         tv_pic_path = (TextView) findViewById(R.id.tv_pic_path);
         btn_share = (Button) findViewById(R.id.btn_share);
         btn_share.setOnClickListener(this);
+
+        shareManager = new ShareManager(this, new IShareCallback() {
+            @Override
+            public void onShareCallback(boolean success) {
+                T.getInstance().showShort("分享成功");
+            }
+        });
 
         shareModel = new ShareModel();
         shareModel.title = "测试应用分享";
@@ -72,7 +82,8 @@ public class MainActivity extends Activity implements View.OnClickListener{
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode==0 && resultCode==RESULT_OK){
+        if (shareManager.registerOnActivityCallback(requestCode, resultCode, data)) {
+        }else if (requestCode==0 && resultCode==RESULT_OK){
             if (data != null && data.getData() != null) {
                 // 根据返回的URI获取对应的SQLite信息
                 Uri uri = data.getData();
