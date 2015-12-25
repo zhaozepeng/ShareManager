@@ -22,11 +22,10 @@ import com.tencent.tauth.UiError;
  */
 public class ShareManager {
     private Activity activity;
-    private ShareModel model;
     private IShareCallback callback;
     private PopupWindow popupWindow;
-    //QQ分享回调
-    private IUiListener shareListener;
+    /** 最新一次调用分享的对象 */
+    private IShare shareObject;
 
     /**
      * @param callback 分享出去的回调
@@ -43,12 +42,25 @@ public class ShareManager {
      * @param model 分享出去的实体
      */
     public void show(final ShareModel model) {
-        this.model = model;
         if (popupWindow == null) {
             popupWindow = new SharePopupWindow(activity, new SharePopupWindow.IShareClickCallback() {
                 @Override
                 public void onShareCallback(int position) {
-                    Share.values()[position].doShare(model, activity, Share.values()[position].getType(), callback);
+                    try {
+                        Class<? extends IShare> clazz = Share.values()[position].getShareClass();
+                        shareObject = clazz.newInstance();
+                        shareObject.doShare(model, activity, Share.values()[position].getType(), callback);
+                    } catch (InstantiationException e) {
+                        e.printStackTrace();
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+                @Override
+                public void onDismiss() {
+                    popupWindow = null;
                 }
             });
         }
@@ -56,54 +68,11 @@ public class ShareManager {
     }
 
     /**
-     * 用来在activity的onActivityResult函数中注册分享回调
+     * 用来在activity的onActivityResult函数中注册分享回调，比如QQ和系统分享
      * @return 是否是分享回调，如果是，返回true，表明activity不用处理相关result
      */
     public boolean registerOnActivityCallback(int requestCode, int resultCode, Intent data){
-        //QQ分享回调处理
-        if (requestCode == Constants.REQUEST_QQ_SHARE) {
-            if (callback != null) {
-                generateShareListener();
-                Tencent.onActivityResultData(requestCode, resultCode, data, shareListener);
-            }
-            return true;
-        }
-        //系统分享回调处理
-        else if (requestCode == SystemShare.REQUEST_SYSTEM_SHARE){
-            if (callback != null){
-                callback.onShareCallback(resultCode==Activity.RESULT_OK);
-            }
-            return true;
-        }
-        return false;
-    }
-
-    private void generateShareListener(){
-        if (shareListener == null) {
-            shareListener = new IUiListener() {
-                @Override
-                public void onComplete(Object o) {
-                    L.i("qq share success", o.toString());
-                    if (callback != null)
-                        callback.onShareCallback(true);
-                }
-
-                @Override
-                public void onError(UiError uiError) {
-                    L.i("qq share fail:code" + uiError.errorCode + "\tmessage:"
-                            + uiError.errorMessage + "\tdetail:" + uiError.errorDetail);
-                    if (callback != null)
-                        callback.onShareCallback(false);
-                }
-
-                @Override
-                public void onCancel() {
-                    L.i("qq share cancel");
-                    if (callback != null)
-                        callback.onShareCallback(false);
-                }
-            };
-        }
+            return shareObject!=null && shareObject.doShareCallback(requestCode, resultCode, data);
     }
 
     /**
@@ -118,7 +87,7 @@ public class ShareManager {
 
         private String name;
         private int drawable;
-        private Class shareClass;
+        private Class<? extends IShare> shareClass;
         private int type;
 
         Share(String name, int drawable, int type, Class<? extends IShare> shareClass){
@@ -139,12 +108,8 @@ public class ShareManager {
             return type;
         }
 
-        public void doShare(ShareModel model, Context context, int type, IShareCallback callback){
-            try {
-                ((IShare)shareClass.newInstance()).doShare(model, context, type, callback);
-            } catch (Exception e) {
-                L.e("ShareManager error", e);
-            }
+        public Class<? extends IShare> getShareClass() {
+            return shareClass;
         }
     }
 }

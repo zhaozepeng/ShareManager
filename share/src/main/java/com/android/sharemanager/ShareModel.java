@@ -1,6 +1,7 @@
 package com.android.sharemanager;
 
-import android.net.Uri;
+
+import java.util.ArrayList;
 
 /**
  * Description: 分享的基本实体
@@ -9,6 +10,8 @@ import android.net.Uri;
  * @since 2015-12-18
  */
 public class ShareModel {
+    /** 分享的类型，图片，文字等 */
+    public int type;
     /** 分享的标题 */
     public String title;
     /** 分享内容 */
@@ -16,9 +19,7 @@ public class ShareModel {
     /** 分享的链接 */
     public String shareUrl;
     /** 分享图片的网络url */
-    public String imageUrl;
-    /** 分享图片的本地uri */
-    public Uri imageUri;
+    public ArrayList<String> imageUrl;
     /** 分享图片的本地path路径 */
-    public String imagePath;
+    public ArrayList<String> imagePath;
 }

@@ -2,7 +2,10 @@ package com.android.sharemanager;
 
 import android.app.Activity;
 import android.app.Service;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.PaintDrawable;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -19,24 +22,24 @@ import android.widget.TextView;
 
 public class SharePopupWindow extends PopupWindow {
 
-			private View mMenuView;
-			private LayoutInflater inflater;
-			private GridView gridView;
-			private TextView tv_dismiss;
-			private Activity context;
-			private View view;
+	private View mMenuView;
+	private LayoutInflater inflater;
+	private GridView gridView;
+	private TextView tv_dismiss;
+	private Activity context;
+	private View view;
 
-			public SharePopupWindow(Activity context, final IShareClickCallback callback) {
-				super();
-				this.context = context;
-				inflater = (LayoutInflater) context.getSystemService(Service.LAYOUT_INFLATER_SERVICE);
-				mMenuView = inflater.inflate(R.layout.share_popupwindow, null);
+	public SharePopupWindow(Activity context, final IShareClickCallback callback) {
+		super();
+		this.context = context;
+		inflater = (LayoutInflater) context.getSystemService(Service.LAYOUT_INFLATER_SERVICE);
+		mMenuView = inflater.inflate(R.layout.share_popupwindow, null);
 
-				gridView = (GridView) mMenuView.findViewById(R.id.gridview);
-				tv_dismiss = (TextView) mMenuView.findViewById(R.id.tv_dismiss);
+		gridView = (GridView) mMenuView.findViewById(R.id.gridview);
+		tv_dismiss = (TextView) mMenuView.findViewById(R.id.tv_dismiss);
 
-				gridView.setAdapter(new GridViewAdapter());
-				gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+		gridView.setAdapter(new GridViewAdapter());
+		gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				if (callback != null)
@@ -46,6 +49,8 @@ public class SharePopupWindow extends PopupWindow {
 		});
 
 		this.setAnimationStyle(R.style.share_PopupAnimation);
+		//http://stackoverflow.com/questions/3121232/android-popup-window-dismissal
+		this.setBackgroundDrawable(new BitmapDrawable(null,""));
 		this.setFocusable(true);
 
 		tv_dismiss.setOnClickListener(new OnClickListener() {
@@ -58,7 +63,6 @@ public class SharePopupWindow extends PopupWindow {
 		this.setContentView(mMenuView);
 		this.setWidth(LayoutParams.MATCH_PARENT);
 		this.setHeight(LayoutParams.WRAP_CONTENT);
-		this.setFocusable(true);
 
 		//点击popUpWindow其他部分消失
 		mMenuView.setOnTouchListener(new OnTouchListener() {
