@@ -13,6 +13,7 @@ import com.android.sharemanager.ShareModel;
 import com.tencent.connect.common.Constants;
 import com.tencent.connect.share.QQShare;
 import com.tencent.connect.share.QzoneShare;
+import com.tencent.open.utils.ThreadManager;
 import com.tencent.tauth.IUiListener;
 import com.tencent.tauth.Tencent;
 import com.tencent.tauth.UiError;
@@ -49,10 +50,10 @@ public class TencentShare implements IShare {
 
     @Override
     public boolean doShareCallback(int requestCode, int resultCode, Intent data) {
-        if (requestCode == Constants.REQUEST_QQ_SHARE) {
+        if (requestCode == Constants.REQUEST_QQ_SHARE
+                || requestCode == Constants.REQUEST_QZONE_SHARE) {
             if (callback != null) {
-                generateShareListener();
-                Tencent.onActivityResultData(requestCode, resultCode, data, shareListener);
+                Tencent.onActivityResultData(requestCode, resultCode, data, generateShareListener());
             }
             return true;
         }
@@ -82,13 +83,9 @@ public class TencentShare implements IShare {
     }
 
     private void QQZone(){
-        int shareType = QzoneShare.SHARE_TO_QZONE_TYPE_NO_TYPE;
-        if (model.type == 1){
-            shareType = QzoneShare.SHARE_TO_QZONE_TYPE_IMAGE_TEXT;
-        }
         final Bundle params = new Bundle();
         //QQ空间分享类型
-        params.putInt(QzoneShare.SHARE_TO_QZONE_KEY_TYPE, shareType);
+        params.putInt(QzoneShare.SHARE_TO_QZONE_KEY_TYPE, QzoneShare.SHARE_TO_QZONE_TYPE_IMAGE_TEXT);
         //分享的标题。注：PARAM_TITLE、PARAM_IMAGE_URL、PARAM_	SUMMARY不能全为空，最少必须有一个是有值的。
         params.putString(QzoneShare.SHARE_TO_QQ_TITLE, model.title);
         //分享的消息摘要，最长50个字
@@ -96,11 +93,8 @@ public class TencentShare implements IShare {
         //这条分享消息被好友点击后的跳转URL。
         params.putString(QzoneShare.SHARE_TO_QQ_TARGET_URL, model.shareUrl);
         //分享的图片本地URL
-        params.putStringArrayList(QzoneShare.SHARE_TO_QQ_IMAGE_LOCAL_URL, model.imagePath);
-//        //分享图片的外部URL
-////        params.putStringArrayList(QzoneShare.SHARE_TO_QQ_IMAGE_URL, model.imageUrl);
-
-        Tencent.createInstance("222222", context).shareToQzone(context, params, generateShareListener());
+        params.putStringArrayList(QzoneShare.SHARE_TO_QQ_IMAGE_URL, model.imagePath);
+        mTencent.shareToQzone(context, params, generateShareListener());
     }
 
     private IUiListener generateShareListener(){
