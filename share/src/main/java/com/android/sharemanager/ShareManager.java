@@ -62,10 +62,10 @@ public class ShareManager {
     }
 
     /**
-     * 用来在activity的onActivityResult函数中注册分享回调，比如QQ和系统分享
+     * 用来在制定的函数（比如onactivityResult）中注册分享回调
      * @return 是否是分享回调，如果是，返回true，表明activity不用处理相关result
      */
-    public boolean registerOnActivityCallback(int requestCode, int resultCode, Intent data){
+    public boolean registerOnShareCallback(int requestCode, int resultCode, Intent data){
             return shareObject!=null && shareObject.doShareCallback(requestCode, resultCode, data);
     }
 

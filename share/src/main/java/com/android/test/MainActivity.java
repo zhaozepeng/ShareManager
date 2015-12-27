@@ -92,7 +92,7 @@ public class MainActivity extends Activity implements View.OnClickListener{
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (shareManager.registerOnActivityCallback(requestCode, resultCode, data)) {
+        if (shareManager.registerOnShareCallback(requestCode, resultCode, data)) {
         }else if (requestCode==0 && resultCode==RESULT_OK){
             if (data != null && data.getData() != null) {
                 // 根据返回的URI获取对应的SQLite信息
