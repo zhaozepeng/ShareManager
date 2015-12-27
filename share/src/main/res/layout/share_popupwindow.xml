@@ -5,10 +5,10 @@
     android:gravity="center_horizontal"
     android:orientation="vertical" >
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/pop_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="285dp"
         android:layout_alignParentBottom="true"
         android:orientation="vertical" >
 
@@ -17,13 +17,15 @@
             android:layout_height="wrap_content"
             android:background="@mipmap/bg_window"
             android:orientation="vertical"
-            android:paddingBottom="16dp"
-            android:paddingTop="16dp">
+            android:paddingBottom="4dp"
+            android:paddingTop="4dp"
+            android:layout_alignParentBottom="true">
 
             <GridView
                 android:id="@+id/gridview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:numColumns="3"
                 android:verticalSpacing="10dp">
 
@@ -35,10 +37,11 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="取消"
+                android:layout_marginTop="5dp"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:textColor="#0080FF"
-                android:textSize="16sp"/>
+                android:textSize="18sp"/>
         </LinearLayout>
-    </LinearLayout>
+    </RelativeLayout>
 
 </RelativeLayout>

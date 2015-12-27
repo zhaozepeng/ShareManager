@@ -1,18 +1,12 @@
 package com.android.sharemanager;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.view.Gravity;
 import android.widget.PopupWindow;
 
-import com.android.libcore.log.L;
 import com.android.sharemanager.system.SystemShare;
 import com.android.sharemanager.qq.TencentShare;
-import com.tencent.connect.common.Constants;
-import com.tencent.tauth.IUiListener;
-import com.tencent.tauth.Tencent;
-import com.tencent.tauth.UiError;
 
 /**
  * Description: #TODO
@@ -43,7 +37,7 @@ public class ShareManager {
      */
     public void show(final ShareModel model) {
         if (popupWindow == null) {
-            popupWindow = new SharePopupWindow(activity, new SharePopupWindow.IShareClickCallback() {
+            popupWindow = new ShareGridViewPopupWindow(activity, new ShareGridViewPopupWindow.IShareClickCallback() {
                 @Override
                 public void onShareCallback(int position) {
                     try {
